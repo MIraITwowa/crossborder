@@ -216,3 +216,25 @@ DYNAMIC_PRICING_ENABLED = True
 PRICE_ADJUSTMENT_THRESHOLD = 0.2  # 20% max adjustment
 PRICING_UPDATE_INTERVAL = 300  # 5 minutes in seconds
 
+# Celery Beat Schedule (Periodic Tasks)
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update-product-pricing': {
+        'task': 'products.tasks.update_product_pricing',
+        'schedule': PRICING_UPDATE_INTERVAL,  # Every 5 minutes
+    },
+    'update-interaction-features': {
+        'task': 'recommendations.tasks.update_interaction_features',
+        'schedule': crontab(minute='*/15'),  # Every 15 minutes
+    },
+    'expire-queue-entries': {
+        'task': 'orders.tasks.expire_queue_entries',
+        'schedule': crontab(minute='*/5'),  # Every 5 minutes
+    },
+    'generate-recommendations-daily': {
+        'task': 'recommendations.tasks.train_recommendation_model',
+        'schedule': crontab(hour=2, minute=0),  # Daily at 2 AM
+    },
+}
+
